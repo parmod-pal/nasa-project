@@ -1,13 +1,13 @@
-const { getAllLaunches,addNewLaunch } = require('../../models/launches.model');
+const { getAllLaunches,addNewLaunch,existWithLaunchId,abortLaunchId } = require('../../models/launches.model');
 
 function httpGetAllLaunches(req,res){
     return res.status(200).json(getAllLaunches());
 }
-function httAddnewLaunch(req,res){
+function httpAddnewLaunch(req,res){
     launch = req.body;
     launch.launchDate = new Date(launch.launchDate);
 
-    if(launch.mission.length == 0 || launch.rocket.length == 0 || launch.destination.length == 0 || launch.launchDate.length == 0){
+    if(!launch.mission || !launch.rocket || !launch.target || !launch.launchDate){
         return res.status(400).json({
             "error": "Please enter correct launch details."
         });
@@ -22,7 +22,21 @@ function httAddnewLaunch(req,res){
     return res.status(201).json(launch);
 }
 
+function httpAbortLaunch(req,res){
+    const launchId = Number(req.params.id);
+    if(!existWithLaunchId(launchId)){
+        return res.status(404).json({
+            error : 'Launch not found'
+        })
+    }
+    const aborted = abortLaunchId(launchId);
+    return res.status(200).json(aborted);
+
+}
+
 module.exports = {
     httpGetAllLaunches,
-    httAddnewLaunch
+    httpAddnewLaunch,
+    httpAbortLaunch,
+    
 }
