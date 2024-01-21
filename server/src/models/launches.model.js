@@ -1,3 +1,4 @@
+const launchesDB = require('./launches.mongo');
 const launches = new Map();
 latestFlightNumber = 100;
 const launch = {
@@ -10,8 +11,9 @@ const launch = {
   upcoming : true,
   success : true
 };
+saveLaunch(launch);
 
-launches.set(launch.flightNumber,launch);
+
 
 function getAllLaunches(){
 return Array.from(launches.values());
@@ -41,6 +43,18 @@ function abortLaunchId(launchId){
   aborted.success = false;
   return aborted;
 
+}
+async function saveLaunch(launch){
+  try{
+    await launchesDB.updateOne({
+      flightNumber : launch.flightNumber
+    },launch,{
+      upsert : true
+    })
+
+  } catch(err){
+    console.log(`Error:${err}`)
+  }
 }
 
 module.exports = {
